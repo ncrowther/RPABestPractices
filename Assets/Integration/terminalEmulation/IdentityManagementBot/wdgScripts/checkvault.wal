@@ -1,0 +1,7 @@
+¦defVar --name imsCredentialsName --type String --value IMS_CREDS
+defVar --name imsUsername --type String
+defVar --name imsPassword --type SecureString
+defVar --name vaultSuccess --type Boolean
+
+getVaultItem --name "${imsCredentialsName}" --system  vaultSuccess=success imsUsername=userName imsPassword=password
+logMessage --message "Result: ${vaultSuccess}.  ${imsUsername} retreived from system vault" --type "Info"*	20.10.4.0
