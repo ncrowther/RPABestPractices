@@ -1,0 +1,67 @@
+
+	µˆ¢gµiÍJ™Òˆpî3¼ýdefVar --name engineUn --type SpeechEngine
+defVar --name languageEn --type Language
+defVar --name chatStorage --type StorageAdapter
+defVar --name userAnswer --type String
+defVar --name bye --type List --innertype String --value "[no,bye,n]"
+defVar --name exit --type Boolean
+defVar --name ODM_Body --type String
+defVar --name ODM_response --type String
+defVar --name value_out --type String --output
+defVar --name extractionSuccess --type Boolean
+defVar --name extractedTable --type DataTable
+defVar --name tableRows --type Numeric
+defVar --name tableColumns --type Numeric
+defVar --name rowsQuantity --type Numeric
+defVar --name columnsQuantity --type Numeric
+defVar --name columnIndex --type Numeric
+defVar --name cellContent --type String
+defVar --name vODMCredUser --type String
+defVar --name vODMCredPassword --type String
+defVar --name vAuthData --type StringDictionary --innertype String
+defVar --name vB64UserPassword --type String
+
+setVar --name "${vODMCredUser}" --value "rtsAdmin"
+setVar --name "${vODMCredPassword}" --value "rtsAdmin"
+
+//# Build authorization header
+textToBase64 --source "${vODMCredUser}:${vODMCredPassword}" --encoding "UTF8" vB64UserPassword=value
+strDictAdd --key Authorization --value "Basic ${vB64UserPassword}" --dictionary ${vAuthData}
+
+setProfiling
+setTimeout --timeout 00:02:00
+googleEngine --culture "en-US" --voice "en-US-Standard-B" engineUn=value
+createLanguage --culture "en-US" languageEn=value
+createStorageAdapter --storageStrategy "Server" chatStorage=storageAdapter
+botConnect --type "Chat" --language ${languageEn} --storageAdapter ${chatStorage} --timeout "00:05:00"
+	
+	botSay --language ${languageEn} --text "\"Hi! My name is Lucia the herbal doctor\""
+	botAsk --beep  --language ${languageEn} --text "How can I help?" userAnswer=value
+	contains --value "${userAnswer}" --collection "${bye}" exit=value
+	while --left "${exit}" --operator "Is_True" --negate
+		changeTextCase --text "${userAnswer}" --type "Lower" userAnswer=value
+		logMessage --message "${userAnswer}" --type "Info"
+		goSub --label callOdm
+		logMessage --message "ODM Response: ${cellContent}" --type "Info"
+		botSay --language ${languageEn} --text "${cellContent}"
+		botAsk --beep  --language ${languageEn} --text "Can I help further?" userAnswer=value
+		contains --value "${userAnswer}" --collection "${bye}" exit=value
+	endWhile
+	botSay --language ${languageEn} --text "Goobye from Lucia Herbal Medicinist."
+botDisconnect
+
+beginSub --name callOdm
+	setVar --name "${ODM_Body}" --value "{\"question\": \"${userAnswer}\"}"
+	logMessage --message "### Calling ODM with : ${ODM_Body}" --type "Info"
+	httpRequest --verb "Post" --url "http://localhost:9090/DecisionService/rest/v1/HerbalMedicineChatBot_RuleApp/1.0/HerbalMedicineChatBot/1.0?format=JSON" --headers ${vAuthData} --formatter "Json" --source "${ODM_Body}" ODM_response=value
+	logMessage --message "Response = ${ODM_response}" --type "Info"
+	
+	jsonToTable --json "${ODM_response}" --jsonPath "$" tableColumns=columns tableRows=rows extractionSuccess=success extractedTable=value
+	logMessage --message "Success: ${extractionSuccess}\r\nRows: ${tableRows}\r\nColumns: ${tableColumns}\r\nTable: ${extractedTable}" --type "Info"
+	
+	findColumnByName --dataTable ${extractedTable} --name response columnIndex=value
+	logMessage --message "Column position found: ${columnIndex}" --type "Info"
+	
+	getTableCell --dataTable ${extractedTable} --column 2 --row 1 cellContent=value
+	logMessage --message "Cell Content: ${cellContent}" --type "Info"
+endSub"	íW(ÛÂA™­¶ÛÊz|*	20.12.5.0

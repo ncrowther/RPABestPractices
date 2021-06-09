@@ -1,0 +1,24 @@
+
+	T4dEfMA¿	 ‚£’ÁdefVar --name vPostCode --type String --value 02100 --parameter 
+defVar --name vYearlyConsumption --type String --value 4500 --parameter 
+defVar --name vProductName --type String --output 
+defVar --name vPrice --type String --output 
+defVar --name vURL --type String --output 
+defVar --name vBrowserWindow --type Browser
+webStart --name web01 --type "Chrome" vBrowserWindow=value
+webNavigate --url "https://sahkovertailu.fi"
+webClick --selector "CssSelector" --css "body > div > div.message.type-modal > div.message-component.message-row.sticky-buttons > div:nth-child(2) > div > button:nth-child(2)" --simulatehuman 
+webSet --value "${vPostCode}" --selector "XPath" --xpath "//*[@id=\"address\"]" --simulatehuman 
+webClick --selector "CssSelector" --css "#addressButton" --simulatehuman 
+webSendKeys --value "${vYearlyConsumption}" --selector "XPath" --xpath "//*[@id=\"old_bill[yearly_consumption]\"]" --simulatehuman 
+sendKeys --keys "{ENTER}"
+delay --timeout "00:00:02"
+webGet --selector "XPath" --xpath "/html/body/section[2]/div[5]/div[1]/div[1]/a/strong" --simulatehuman  vPrice=value
+logMessage --message "${vPrice}" --type "Info"
+webGet --selector "XPath" --xpath "/html/body/section[2]/div[5]/div[1]/div[2]/a/strong" --simulatehuman  vProductName=value
+logMessage --message "${vProductName}" --type "Info"
+webClick --selector "XPath" --xpath "/html/body/section[2]/div[5]/div[1]/div[4]/a" --simulatehuman 
+logMessage --message "${vBrowserWindow.Url}" --type "Info"
+delay --timeout "00:00:03"
+setVar --name "${vURL}" --value "${vBrowserWindow.Url}"
+webClose --name web01"	håíLC…ˆµM|qGœ*	20.12.5.0

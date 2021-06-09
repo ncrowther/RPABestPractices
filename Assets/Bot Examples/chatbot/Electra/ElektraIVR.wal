@@ -1,0 +1,34 @@
+§defVar --name vSE --type SpeechEngine
+defVar --name language --type Language
+defVar --name vAnswer --type String
+defVar --name vPostCode --type String
+defVar --name vYearlyConsumption --type String
+defVar --name vResponse --type String
+defVar --name vURL --type String
+defVar --name vPrice --type String
+defVar --name vProductName --type String
+amazonEngine --culture "en-US" --voice Joanna vSE=value
+createLanguage --culture "en-US" --speech ${vSE} language=value
+botConnect --type "Ivr" --language ${language} --autoanswer  --timeout "00:05:00"
+	botSay --language ${language} --text "Hello! My name is Electra. I\'m an IBM RPA bot to help you with electricity related topics."
+	botAsk --recognitionTimeout 00:00:20 --speechCompleteTimeout 00:00:15 --noInputTimeout 00:00:10 --beep  --language ${language} --text "What can I do for you today?" --timeout "00:00:30" vAnswer=value
+	logMessage --message "Answer: ${vAnswer}" --type "Info"
+	botSay --language ${language} --text "Sure. I just need to ask you some additional information. Let\'s start."
+	if --left "${vAnswer}" --operator "Contains" --right contract
+		botAsk --recognitionTimeout 00:00:20 --speechCompleteTimeout 00:00:15 --noInputTimeout 00:00:30 --speechIncompleteTimeout 00:00:05 --beep  --language ${language} --text "Tell me your postcode please." --timeout "00:00:30" vPostCode=value
+		logMessage --message "${vPostCode}" --type "Info"
+		botAsk --noInputTimeout 00:00:30 --beep  --language ${language} --text "And your estimated yearly electricity consumption in kilowatt-hours?" --timeout "00:00:45" vYearlyConsumption=value
+		logMessage --message "${vYearlyConsumption}" --type "Info"
+		botSay --language ${language} --text "Got it. Postcode ${vPostCode} and yearly consumption ${vYearlyConsumption}. Let me check. Just a couple of seconds..."
+		delay --timeout "00:00:02"
+		botStartOnHold --message Default
+			executeScript --name GetCheapestElectricityContract --parameters "vPostCode=${vPostCode},vYearlyConsumption=${vYearlyConsumption}" --output "vURL=${vURL},vPrice=${vPrice},vProductName=${vProductName}"
+		botStopOnHold
+		botSay --language ${language} --text "Hello, I\'m back. So, it seems that the cheapest product currently is ${vProductName} with annual cost of ${vPrice}."
+	endIf
+	botAsk --noInputTimeout 00:00:30 --beep  --language ${language} --text "Anything else I can do for you?" --timeout "00:00:45" vResponse=value
+	if --left "${vResponse}" --operator "Begins_With" --right No
+		botSay --language ${language} --text "OK, bye!"
+	endIf
+	delay --timeout "00:00:02"
+botDisconnect*	20.12.5.0

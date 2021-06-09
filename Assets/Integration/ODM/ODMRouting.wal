@@ -1,0 +1,45 @@
+
+	«Üt׃Z‡Cƒ'¬.½ƒCףdefVar --name EmailServer --type EmailConnection
+defVar --name emailUser --type String
+defVar --name emailPass --type SecureString
+defVar --name loopCounter --type Numeric --value 2
+defVar --name emailCount --type Numeric
+defVar --name emailMessage --type EmailMessage
+defVar --name emailSubject --type String
+defVar --name emailBody --type String
+defVar --name emailFrom --type String
+defVar --name emailReceivedDate --type DateTime
+defVar --name odmCallSuccessful --type Boolean
+defVar --name odmCallResponse --type String
+defVar --name odm_message_out --type String
+defVar --name odm_routeTo_out --type String
+defVar --name projectCost --type Numeric
+defVar --name projectCostString --type String
+defVar --name projectCode --type String
+defVar --name odmJSONrequest --type String
+getVaultItem --name DemoEmail emailUser=userName emailPass=password
+logMessage --message "Email User ID from Vault = ${emailUser}" --type "Info"
+imapConnect --mailhost "imap.gmail.com" --mailport 993 --usessl  --UseConnectionToSend  --smtpcredentials  --smtphost "smtp.gmail.com" --smtpport 587 --smtpusername "${emailUser}" --smtppassword "${emailPass}" --smtpusessl  --username "${emailUser}" --mailusername "${emailUser}" --mailpassword "${emailPass}" EmailServer=value
+logMessage --message "Email Server Connected. Variable = ${EmailServer}" --type "Info"
+emailCount --connection ${EmailServer} emailCount=value
+foreach --collection "${EmailServer}" --variable "${emailMessage}"
+	emailRead --message ${emailMessage} emailSubject=subject emailBody=body emailFrom=from emailReceivedDate=receiveddate
+	if --left "${emailSubject}" --operator "Contains" --right "Project Request"
+		getRegex --text "${emailBody}" --regexPattern "(?:Cost = ֲ£*)(.+)(\\n)" --regexOptions "0" --groupnumber 1 projectCostString=value
+		trimString --text "${projectCostString}" --trimoption "TrimStartAndEnd" projectCostString=value
+		convertStringToNumber --text "${projectCostString}" --allowleadingsign  --allowdecimalpoint  --allowthousands  --allowcurrencysymbol  --culture "en-US" projectCost=value
+		getRegex --text "${emailBody}" --regexPattern "(?:Code = )(.+)(\\n)" --regexOptions "0" --groupnumber 1 projectCode=value
+		trimString --text "${projectCode}" --trimoption "TrimStartAndEnd" projectCode=value
+		setVar --name "${odmJSONrequest}" --value "{\r\n  \"amount_in\": ${projectCost},\r\n  \"product_in\": \"${projectCode}\",\r\n  \"dueDate_in\": \"2028-09-29T02:49:45.000+0100\"\r\n}"
+		httpRequest --verb "Post" --url "http://localhost:9090/DecisionService/rest/v1/RPA/1.0/DepartmentAllocation/1.0/OPENAPI?format=JSON" --formatter "Json" --source "${odmJSONrequest}" --comment "------------  CALL ODM to get routing information  --------------" odmCallSuccessful=success odmCallResponse=value
+		logMessage --message "ODM call Response = ${odmCallResponse}" --type "Info"
+		getRegex --text "${odmCallResponse}" --regexPattern "(?:message_out\":\")(.+)(\",\"routeTo)" --regexOptions "0" --groupnumber 1 odm_message_out=value
+		getRegex --text "${odmCallResponse}" --regexPattern "(?:routeTo_out\":\")(.+)(?=\"})" --regexOptions "0" --groupnumber 1 odm_routeTo_out=value
+		messageBox --title "IBM RPA + ODM bot" --text "Project Request email will be routed to:\r\n                  ${odm_routeTo_out}\r\nreason       ${odm_message_out}" --icon "Information" --buttons "OK" --defaultbutton "FirstButton"
+		emailMove --folder "Routed Projects" --message ${emailMessage}
+	endIf
+endFor
+emailDisconnect --connection ${EmailServer}
+beginSub --name HandleError
+	messageBox --title "Proactive Chase Bot" --text "An Error has been caught during the execution of the bot.\r\nNo further commands will be executed. \r\n// -- TODO implement logic to exit gracefully\r\nThe error command = ${wdg:error.Command}\r\nat line number = ${wdg:errorLineNumber}\r\nMessage = ${wdg:errorMessage}" --icon "Error" --buttons "OK" --defaultbutton "FirstButton"
+endSub"	U#zz>SיE“?ער׳‹״*	20.12.5.0
