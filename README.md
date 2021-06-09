@@ -4,11 +4,12 @@ RPA Best Practices
 This repository contains IBM RPA Best Practice artefacts.  These artefacts are public doimain. 
 Use this repo to find the answers to the following questions:
 
-- RPA best practices 
+- RPA best practices
+- Estimation tools 
 - Bot governance
 - Scaling RPA
 - Securing RPA
-- Example bot usecases and videos
+- RPA use cases and videos
 - Measuring success
 
 The repo is structured based on the IBM System Solution Implementation Standard:
