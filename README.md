@@ -1,4 +1,4 @@
-# RPABestPractices
+# RPA Good Practices
 RPA Good Practices
 
 This repository contains IBM RPA Good Practice artefacts.  These artefacts are public doimain. 
