@@ -5,12 +5,9 @@ This repository contains IBM RPA Good Practice artefacts.  These artefacts are p
 Use this repo to find the answers to the following questions:
 
 - RPA best practices (COE)
-- Estimation tools 
-- Bot governance
-- Scaling RPA
-- Securing RPA
+- Tutorials
 - RPA use cases and videos
-- Measuring success
+- Center of Excellence tips
 
 The repo is structured based on the IBM System Solution Implementation Standard:
 
@@ -21,9 +18,11 @@ The repo is structured based on the IBM System Solution Implementation Standard:
      - Estimation Tools
      - Videos
   - Assets
-       - BPM integratopm
-       - ODM integration
-       - API Security Enhancement
+  -    - Connectors
+          - BAW 
+          - ODM
+          - App Connect
+       - Security Enhancement
        - Z integration
        - Notes integration
        - 
