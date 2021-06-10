@@ -16,6 +16,7 @@ The repo is structured based on the IBM System Solution Implementation Standard:
 
   - Roles
   - Guidance
+     - Tutorials
      - Whitepapers
      - Estimation Tools
      - Videos
