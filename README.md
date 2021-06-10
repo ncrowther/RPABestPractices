@@ -4,7 +4,7 @@ RPA Good Practices
 This repository contains IBM RPA Good Practice artefacts.  These artefacts are public doimain. 
 Use this repo to find the answers to the following questions:
 
-- RPA best practices
+- RPA best practices (COE)
 - Estimation tools 
 - Bot governance
 - Scaling RPA
